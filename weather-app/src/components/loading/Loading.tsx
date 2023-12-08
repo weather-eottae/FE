@@ -9,8 +9,10 @@ const Loading: React.FC = () => {
       <LoadingIconContainer>
         <Sun src={SunSVG} alt="Sun" />
         <Cloud src={CloudSVG} alt="Cloud" />
-        <p>로딩중입니다</p>
       </LoadingIconContainer>
+      <LoadingTextContainer>
+        <p>로딩중입니다</p>
+      </LoadingTextContainer>
     </LoadingContainer>
   );
 };
@@ -30,21 +32,23 @@ const LoadingContainer = styled.div`
   width: 100%;
   height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 `;
 
 const LoadingIconContainer = styled.div`
-  margin: 300px;
   position: relative;
   width: 110px;
   height: 73px;
+`;
 
+const LoadingTextContainer = styled.div`
+  width: 110px;
+  text-align: center;
+  margin-top: 10px;
   p {
     color: #5d6dbe;
-    font-weight: bold;
-    position: absolute;
-    bottom: -45px;
   }
 `;
 

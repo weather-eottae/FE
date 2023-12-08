@@ -12,33 +12,45 @@ interface IMessage {
 
 interface ChatMessageProps {
   currentUserNick: string; // 현재 사용자의 닉네임을 받기 위한 prop
+  currentRoom: string; // 새로운 prop 추가
 }
 
 const formatTimeAgo = (timestamp: string | number | Date) => {
-  const result = formatDistanceToNow(new Date(timestamp), {
+  const messageTime = new Date(timestamp);
+  const currentTime = new Date();
+
+  if (messageTime > currentTime) {
+    // 메시지 시간이 현재 시간보다 미래인 경우
+    return "방금 전";
+  }
+
+  const result = formatDistanceToNow(messageTime, {
     addSuffix: true,
     locale: ko,
   });
-  // '1분 미만 전'-> '1분 전'으로 변경
+
   return result.replace("1분 미만", "방금");
 };
 
-export const ChatMessage = ({ currentUserNick }: ChatMessageProps) => {
-  // 메시지들을 저장할 상태를 생성
+export const ChatMessage = ({
+  currentUserNick,
+  currentRoom,
+}: ChatMessageProps) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
 
   useEffect(() => {
-    // 서버로부터 메시지를 수신할 리스너를 설정
-    // 이벤트 이름을 백엔드와 일치
-    socket.on("message", (messageData) => {
+    const handleNewMessage = (messageData: IMessage) => {
       setMessages((prevMessages) => [...prevMessages, messageData]);
-    });
-    // 컴포넌트가 언마운트시 리스너를 제거.
-    // 소켓 연결은 유지
-    return () => {
-      socket.off("message");
     };
-  }, []);
+
+    socket.on("message", handleNewMessage);
+
+    return () => {
+      // 채팅방 변경시 메시지 배열을 초기화
+      setMessages([]);
+      socket.off("message", handleNewMessage); // 리스너 제거
+    };
+  }, [currentRoom]); // 방이 변경될 때마다 실행
 
   return (
     <StyledChatMessage>

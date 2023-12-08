@@ -7,10 +7,27 @@ import chat from "../../assets/img/nav/chat-square-text.png";
 import clothing from "../../assets/img/nav/window-stack.png";
 import user from "../../assets/img/nav/person-vcard.png";
 import logout from "../../assets/img/nav/logout.png";
+import login from "../../assets/img/nav/login.png";
 import { Link } from "react-router-dom";
 import MobileNav from "./MobileNav";
+import { useState, useEffect } from "react";
 
 const Nav = () => {
+  const [isLoggin, setIsLoggin] = useState(false);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access_token");
+    const refreshToken = localStorage.getItem("refresh_token");
+    setIsLoggin(accessToken && refreshToken);
+  }, []);
+
+  const onLogOut = () => {
+    console.log("로그아웃 버튼 클릭");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    setIsLoggin(false);
+  };
+
   return (
     <>
       <StyledMobileNav>
@@ -26,7 +43,7 @@ const Nav = () => {
           <li>
             <Link to={"/"}>
               <span>
-                <img src={weather} />
+                <img src={weather} alt="오늘의 날씨" />
                 오늘의 날씨
               </span>
             </Link>
@@ -34,7 +51,7 @@ const Nav = () => {
           <li>
             <Link to={"/chat"}>
               <span>
-                <img src={chat} />
+                <img src={chat} alt="지역 톡" />
                 지역 톡
               </span>
             </Link>
@@ -42,7 +59,7 @@ const Nav = () => {
           <li>
             <Link to={"/feed"}>
               <span>
-                <img src={clothing} />
+                <img src={clothing} alt="오늘 뭐 입지" />
                 오늘 뭐 입지
               </span>
             </Link>
@@ -50,7 +67,7 @@ const Nav = () => {
           <li>
             <Link to={"/archive"}>
               <span>
-                <img src={archive} />
+                <img src={archive} alt="게시글 등록" />
                 게시글 등록
               </span>
             </Link>
@@ -58,15 +75,25 @@ const Nav = () => {
           <li>
             <Link to={"/user"}>
               <span>
-                <img src={user} />
+                <img src={user} alt="마이 페이지" />
                 마이 페이지
               </span>
             </Link>
           </li>
         </NavWrap>
-        <button>
-          <img src={logout} />
-        </button>
+        {isLoggin && (
+          <button onClick={onLogOut}>
+            <img src={logout} alt="로그아웃" />
+          </button>
+        )}
+
+        {!isLoggin && (
+          <Link to={"/login"}>
+            <button>
+              <img src={login} alt="로그인" />
+            </button>
+          </Link>
+        )}
       </Container>
     </>
   );
@@ -107,11 +134,18 @@ const Container = styled.div`
     height: 20%;
     display: flex;
     align-items: flex-start;
+    img {
+      width: 100%;
+    }
   }
   button {
     border: none;
     margin-top: 200px;
     background: none;
+    img {
+      width: 100%;
+      max-width: 129px;
+    }
   }
   @media ${media.large} {
     width: 20%;

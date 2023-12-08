@@ -1,115 +1,134 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Main from '../../components/main/MainLayout';
 import styled from 'styled-components';
+import Main from '../../components/main/MainLayout';
 import TopWrap from './TopWrap';
 import ImageWrap from './ImageWrap';
 import ContentWrap from './ContentWrap';
 import ButtonWrap from './ButtonWrap';
 import Modal from './Modal';
-import axios from 'axios';
-
-const BASE_URL = 'http://43.200.188.52';
+import createPostAPI from '../../api/createPostApi';
 
 const NewPost = () => {
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
+
 	const [content, setContent] = useState('');
+	const [files, setFiles] = useState([]); // 이미지 파일들
+
+	const [hashtags, setHashtags] = useState('');
+	const [temperature, setTemperature] = useState(''); // 온도를 저장할 상태 변수
+	const [location, setLocation] = useState(''); // 위치를 저장할 상태 변수
+	const [showAlertModal, setShowAlertModal] = useState(false);
+	const [alertMessage, setAlertMessage] = useState('');
+	const [showLoginModal, setShowLoginModal] = useState(false);
 	const [showModal, setShowModal] = useState(false);
-	const [showDeleteModal, setShowDeleteModal] = useState(false);
-	const [isEditing, setIsEditing] = useState(false);
+	const [showCancelModal, setShowCancelModal] = useState(false);
 	const navigate = useNavigate();
 
-	// 로컬 스토리지에서 토큰을 가져오는 함수
 	const getTokenFromLocalStorage = () => {
-		return localStorage.getItem('token');
+		return localStorage.getItem('access_token');
 	};
 
 	const handleContentChange = (newContent) => {
 		setContent(newContent);
-		setIsEditing(true);
+	};
+
+	const handleHashtagsChange = (newHashtags) => {
+		setHashtags(newHashtags);
+	};
+	const handleFilesChange = (newFiles) => {
+		setFiles(newFiles);
+	};
+
+	const handleLocationChange = (newLocation) => {
+		setLocation(newLocation); // 위치 상태 업데이트
+	};
+
+	const handleTemperatureChange = (newTemperature) => {
+		setTemperature(newTemperature);
 	};
 
 	const handleSave = () => {
-		setShowModal(true);
+		// 내용과 이미지가 모두 입력되었는지 검사
+		if (!content.trim() || files.length === 0) {
+			setAlertMessage('내용과 이미지를 모두 입력해주세요.');
+			setShowAlertModal(true);
+			return;
+		}
+		setShowModal(true); // 모든 조건이 충족됐을 때만 저장 확인 모달 표시
 	};
 
-	const createPost = async () => {
+	const handleCancel = () => {
+		setShowCancelModal(true); // 취소 모달 표시
+	};
+
+	const handleConfirmCancel = () => {
+		navigate('/'); // 메인 페이지로 리디렉션
+	};
+
+	const handleConfirmSave = async () => {
 		try {
-			// 로컬 스토리지에서 토큰을 가져옴
+			const safeFiles = files || [];
 			const token = getTokenFromLocalStorage();
 
-			// 아래에 필요한 변수들을 선언하고 값을 지정해주세요.
-			const accountNonExpired = '';
-			const accountNonLocked = '';
-			const authorities = '';
-			const credentialsNonExpired = '';
-			const enabled = true;
-			const hashtags = ''; // 해시태그
-			const location = ''; // 위치 정보
-			const mediaFiles = []; // 미디어 파일 목록
-			const password = ''; // 비밀번호
-			const temperature = ''; // 온도
-			const username = ''; // 사용자명
-
-			await axios.post(
-				`${BASE_URL}/api/post`,
-				{
-					content,
-					accountNonExpired,
-					accountNonLocked,
-					authorities,
-					credentialsNonExpired,
-					enabled,
-					hashtags,
-					location,
-					mediaFiles,
-					password,
-					temperature,
-					username,
-				},
-				{
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				}
+			await createPostAPI(
+				content, // 분리되지 않은 내용 사용
+				temperature,
+				location,
+				safeFiles,
+				hashtags,
+				token
 			);
-
+			setShowModal(false);
 			navigate('/feed');
 		} catch (error) {
-			console.error('Failed to save post:', error);
+			console.error('Failed to create post:', error);
 		}
 	};
 
-	const handleConfirmSave = () => {
-		// createPost 함수를 호출하고 토큰을 전달
-		createPost();
-	};
-
 	const handleCancelSave = () => {
+		navigate('/feed');
 		setShowModal(false);
 	};
 
-	const handleCancelDelete = () => {
-		setShowDeleteModal(false);
+	useEffect(() => {
+		const token = getTokenFromLocalStorage();
+		if (!token) {
+			setShowLoginModal(true); // 로그인 모달 표시
+		} else {
+			setIsAuthenticated(true);
+		}
+	}, [navigate]);
+
+	const handleConfirmLogin = () => {
+		navigate('/login'); // 로그인 페이지로 이동
 	};
 
-	useEffect(() => {
-		// 컴포넌트가 마운트될 때 한 번만 실행
-		// 토큰을 로컬 스토리지에 저장
-		localStorage.setItem(
-			'token',
-			'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MDA1NzY0OTEsImV4cCI6MTcwMDU4MDA5MSwic3ViIjoidGVzdEBlbWFpbC5jb20iLCJpZCI6NX0.kaUn6n0lwNDANmZXXDVSoKbnnnnAGfHDlt17TCJIWbQ'
+	if (showLoginModal) {
+		return (
+			<Modal message="로그인이 필요합니다." onConfirm={handleConfirmLogin} />
 		);
+	}
 
-		createPost(); // 컴포넌트가 마운트될 때 createPost 함수 호출
-	}, []);
+	if (!isAuthenticated) {
+		return null;
+	}
 
 	return (
 		<Main>
 			<Container>
-				<TopWrap />
-				<ImageWrap />
-				<ContentWrap content={content} onContentChange={handleContentChange} />
-				<ButtonWrap onSave={handleSave} isEditing={isEditing} />
+				<TopWrap
+					onLocationUpdate={handleLocationChange}
+					onTemperatureChange={handleTemperatureChange}
+				/>
+				<ImageWrap onFilesChange={handleFilesChange} />
+				<ContentWrap
+					content={content}
+					hashtags={hashtags}
+					onContentChange={handleContentChange}
+					onHashtagsChange={handleHashtagsChange}
+				/>
+				<ButtonWrap onSave={handleSave} onCancel={handleCancel} />
 				{showModal && (
 					<Modal
 						message="저장하시겠습니까?"
@@ -117,10 +136,18 @@ const NewPost = () => {
 						onCancel={handleCancelSave}
 					/>
 				)}
-				{showDeleteModal && (
+				{showAlertModal && (
 					<Modal
-						message="정말로 삭제하시겠습니까?"
-						onCancel={handleCancelDelete}
+						message={alertMessage}
+						onConfirm={() => setShowAlertModal(false)}
+						// 취소 버튼 없이 '확인' 버튼만 표시
+					/>
+				)}
+				{showCancelModal && (
+					<Modal
+						message="작성을 취소하시겠습니까?"
+						onConfirm={handleConfirmCancel}
+						onCancel={() => setShowCancelModal(false)}
 					/>
 				)}
 			</Container>

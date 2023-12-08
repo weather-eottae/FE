@@ -2,10 +2,9 @@ import styled from "styled-components";
 
 export const Container = styled.div`
   swiper-container {
-    width: 95%;
-    height: 300px;
-    padding: 1rem;
-    margin: 1rem auto;
+    width: 100%;
+    height: 240px;
+    margin: 0.5rem auto;
   }
 
   swiper-slide img {

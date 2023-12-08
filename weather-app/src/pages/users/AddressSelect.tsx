@@ -333,10 +333,12 @@ const Label = styled.label`
 `;
 
 type AddressSelectProps = {
+  initialAddress: string; // 초기 주소 값
   onAddressSelectChange: (address: string) => void; // 콜백 함수 prop 추가
 };
 
 const AddressSelect: React.FC<AddressSelectProps> = ({
+  initialAddress,
   onAddressSelectChange,
 }) => {
   const [selectedRegion, setSelectedRegion] = useState<string>("");
@@ -344,12 +346,15 @@ const AddressSelect: React.FC<AddressSelectProps> = ({
   const [subAreas, setSubAreas] = useState<string[]>([]);
 
   useEffect(() => {
-    const region = addressData.find((r) => r.name === selectedRegion);
-    setSubAreas(region ? region.subAreas : []);
-    setSelectedSubArea(
-      region && region.subAreas.length > 0 ? region.subAreas[0] : ""
-    );
-  }, [selectedRegion]);
+    if (initialAddress) {
+      setSelectedRegion(initialAddress); // 초기 주소 설정
+      const region = addressData.find((r) => r.name === selectedRegion);
+      setSubAreas(region ? region.subAreas : []);
+      setSelectedSubArea(
+        region && region.subAreas.length > 0 ? region.subAreas[0] : ""
+      );
+    }
+  }, [initialAddress]);
 
   const handleRegionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedRegion(event.target.value);

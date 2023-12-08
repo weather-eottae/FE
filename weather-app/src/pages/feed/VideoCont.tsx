@@ -59,7 +59,7 @@ const VideoContainer = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 60px;
+    font-size: 3.75rem;
     color: #5d6dbe;
     z-index: 3;
   }
@@ -80,7 +80,7 @@ const VolumeIcon = styled.div`
   bottom: 23px;
   right: 23px;
   svg {
-    font-size: 15px;
+    font-size: 0.938rem;
     color: #000;
     background-color: rgba(255, 255, 255, 0.6);
     border-radius: 50%;

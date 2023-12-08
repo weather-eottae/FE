@@ -1,23 +1,38 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
-const ContentWrap = ({ onContentChange }) => {
-	const [content, setContent] = useState(''); // 초기 상태 설정
-
+const ContentWrap = ({
+	content,
+	hashtags,
+	onContentChange,
+	onHashtagsChange,
+}) => {
 	const handleContentChange = (event) => {
-		setContent(event.target.value); // 입력 값으로 상태 업데이트
+		// 상위 컴포넌트에 내용 전달
 		onContentChange(event.target.value);
+	};
+
+	const handleHashtagsChange = (event) => {
+		// 상위 컴포넌트에 해시태그 전달
+		onHashtagsChange(event.target.value);
 	};
 
 	return (
 		<Container>
-			<label htmlFor="contentField"></label>
-			<textarea
+			<ContentTextarea
 				id="contentField"
 				value={content}
 				onChange={handleContentChange}
-				maxLength={'500'}
-				placeholder=" 내용을 입력하세요."
+				maxLength={'300'}
+				placeholder="내용을 입력하세요."
+			/>
+			<label htmlFor="hashtagsField">해시태그</label>
+			<HashtagTextarea
+				id="hashtagsField"
+				value={hashtags}
+				onChange={handleHashtagsChange}
+				maxLength={'200'}
+				placeholder="#해시태그를 입력하세요."
 			/>
 		</Container>
 	);
@@ -31,17 +46,30 @@ const Container = styled.div`
 	padding-bottom: 20px;
 	background-color: #fff;
 	border-bottom: 2px solid #000;
+`;
 
-	textarea {
-		width: 100%;
-		height: 10vh;
-		margin: 0 auto;
-		padding: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 2px solid #000;
-		border-radius: 10px;
-		font-family: 'jua', sans-serif;
-	}
+const ContentTextarea = styled.textarea`
+	width: 100%;
+	height: 7vh;
+	margin: 5px auto 10px;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px solid #000;
+	border-radius: 10px;
+	font-family: 'jua', sans-serif;
+`;
+
+const HashtagTextarea = styled.textarea`
+	width: 100%;
+	height: 3vh;
+	margin: 5px auto;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px solid #000;
+	border-radius: 10px;
+	font-family: 'jua', sans-serif;
 `;

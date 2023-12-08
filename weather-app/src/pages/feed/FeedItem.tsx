@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { Post } from "../../types/feedType";
@@ -15,24 +15,34 @@ const FeedItem: FC<FeedItemProps> = ({ post }) => {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const combinedTextLength = useMemo(
+    () =>
+      post.content.length +
+      post.hashtagNames.reduce((acc, tag) => acc + tag.length + 1, 0),
+    [post.content, post.hashtagNames]
+  );
+
+  const showMoreButton = combinedTextLength > 20 || post.content.includes("\n");
+  const shouldDisplayFullText =
+    combinedTextLength <= 20 && !post.content.includes("\n");
+  const displayText = useMemo(
+    () =>
+      isExpanded || shouldDisplayFullText
+        ? post.content
+        : `${post.content.substring(0, 20)}...`,
+    [isExpanded, shouldDisplayFullText, post.content]
+  );
+
   if (!post) {
     return null;
   }
-
-  const combinedTextLength =
-    post.text.length + post.tags.reduce((acc, tag) => acc + tag.length + 1, 0);
-  const showMoreButton = combinedTextLength > 20 || post.text.includes("\n");
-  const displayText =
-    isExpanded || !showMoreButton
-      ? post.text
-      : `${post.text.substring(0, 20)}...`;
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
 
-  const handleUserClick = (userId: string) => {
-    navigate(`/feed/${userId}`);
+  const handleUserClick = (nickName: string) => {
+    navigate(`/feed/${nickName}`);
   };
 
   const handleTagClick = (tag: string) => {
@@ -46,16 +56,16 @@ const FeedItem: FC<FeedItemProps> = ({ post }) => {
         <FeedHeader>
           <img
             src={post.userImg}
-            alt={`${post.userId} 프로필 이미지`}
-            onClick={() => handleUserClick(post.userId)}
+            alt={`${post.nickName} 프로필 이미지`}
+            onClick={() => handleUserClick(post.nickName)}
           />
           <div>
             <div>
               <span
                 className="user"
-                onClick={() => handleUserClick(post.userId)}
+                onClick={() => handleUserClick(post.nickName)}
               >
-                {post.userId}
+                {post.nickName}
               </span>
               <span className="date">{formatDate(post.date)}</span>
             </div>
@@ -66,22 +76,29 @@ const FeedItem: FC<FeedItemProps> = ({ post }) => {
           </div>
         </FeedHeader>
 
-        <FeedSlide imgs={post.imgs} />
+        {post.mediaUrls && post.mediaUrls.length > 0 && (
+          <FeedSlide imgs={post.mediaUrls} />
+        )}
 
-        <FeedHearts heartCount={post.heartCount} postId={post.postId} />
+        <FeedHearts
+          liked={post.liked}
+          heartCount={post.likedCount}
+          postId={post.postId}
+        />
 
         <FeedBottom>
           <div className="feed-text">
             <p>{displayText}</p>
-            {isExpanded && (
-              <div className="feed-tags">
-                {post.tags.map((tag, index) => (
-                  <Tag key={index} onClick={() => handleTagClick(tag)}>
-                    {tag}
-                  </Tag>
-                ))}
-              </div>
-            )}
+            {(isExpanded || shouldDisplayFullText) &&
+              post.hashtagNames.length > 0 && (
+                <div className="feed-tags">
+                  {post.hashtagNames.map((tag, index) => (
+                    <Tag key={index} onClick={() => handleTagClick(tag)}>
+                      #{tag}
+                    </Tag>
+                  ))}
+                </div>
+              )}
           </div>
           {showMoreButton && (
             <MoreButton onClick={toggleExpand}>
@@ -103,6 +120,24 @@ const FeedContainer = styled.div`
   border-radius: 5px;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
   background-color: #fff;
+  @media (max-width: 1024px) {
+    width: 400px;
+  }
+  @media (max-width: 768px) {
+    width: 80%;
+    max-width: 350px;
+  }
+  @media (max-width: 430px) {
+    width: calc(100% - 30px);
+    padding: 20px 0;
+    margin: 0 15px;
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid #525d9191;
+    &:last-child {
+      border-bottom: none;
+    }
+  }
 `;
 
 const FeedContent = styled.div`
@@ -137,25 +172,31 @@ const FeedHeader = styled.div`
   div > div:last-child {
     margin-top: 4px;
     span {
-      font-size: 14px;
+      font-size: 0.875rem;
     }
   }
 `;
 
 const FeedBottom = styled.div`
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: start;
+  word-break: break-all;
   .feed-text {
     display: inline-block;
     text-align: left;
+    p {
+      /* white-space: pre-wrap; */
+      white-space: pre-line;
+    }
   }
   .feed-tags {
     margin-top: 10px;
   }
 `;
 
-const Tag = styled.a`
+const Tag = styled.span`
   color: #5d6dbe;
   margin-right: 7px;
   cursor: pointer;

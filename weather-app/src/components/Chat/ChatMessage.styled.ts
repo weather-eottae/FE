@@ -14,6 +14,13 @@ export const StyledChatMessage = styled.div`
   max-height: 400px; // 메시지 목록의 최대 높이 제한
   margin-bottom: 20px; // 하단 여백 추가
 
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  scrollbar-width: none; // Firefox 설정
+  -ms-overflow-style: none; // IE, Edge 설정
+
   &:last-child {
     border-bottom: none;
   }
@@ -47,6 +54,13 @@ export const MessageBubble = styled.div<MessageBubbleProps>`
     display: flex;
     justify-content: space-between; // 닉네임과 시간을 양 끝으로 분산 배치
     margin-bottom: 4px;
+
+    .nickname {
+      min-width: 100px;
+    }
+    .timestamp {
+      color: ${(props) => (props.own ? "#c8e7ff" : "#564592")};
+    }
   }
 
   .message {

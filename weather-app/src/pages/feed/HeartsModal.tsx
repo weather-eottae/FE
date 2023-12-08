@@ -13,8 +13,8 @@ interface HeartsModalProps {
 const HeartsModal: FC<HeartsModalProps> = ({ heartUsers, onClose }) => {
   const navigate = useNavigate();
 
-  const handleUserClick = (userId: string) => {
-    navigate(`/feed/${userId}`);
+  const handleUserClick = (nickName: string) => {
+    navigate(`/feed/${nickName}`);
   };
 
   return (
@@ -27,13 +27,13 @@ const HeartsModal: FC<HeartsModalProps> = ({ heartUsers, onClose }) => {
         <UserList>
           {heartUsers.map((user, index) => (
             <UserItem key={index}>
-              <div onClick={() => handleUserClick(user.userId)}>
+              <div onClick={() => handleUserClick(user.email)}>
                 <UserInfo>
                   <img
-                    src={user.userImg}
-                    alt={`${user.userId}' 프로필 이미지`}
+                    src={user.imageUrl}
+                    alt={`${user.nickName}' 프로필 이미지`}
                   />
-                  <p>{user.userId}</p>
+                  <p>{user.nickName}</p>
                 </UserInfo>
                 <StyledBsArrowRightSquareFill />
               </div>
@@ -66,14 +66,14 @@ const ModalHeader = styled.div`
   justify-content: center;
   border-radius: 5px 5px 0 0;
   p {
-    font-size: 20px;
+    font-size: 1.25rem;
     color: #fff;
   }
   button {
     position: absolute;
     top: 10px;
     right: 10px;
-    font-size: 20px;
+    font-size: 1.25rem;
     color: #fff;
     border: none;
     background-color: transparent;
@@ -115,5 +115,5 @@ const UserInfo = styled.div`
 
 const StyledBsArrowRightSquareFill = styled(BsArrowRightSquareFill)`
   color: #5d6dbe;
-  font-size: 20px;
+  font-size: 1.25rem;
 `;

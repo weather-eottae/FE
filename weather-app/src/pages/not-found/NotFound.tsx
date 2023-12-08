@@ -40,9 +40,11 @@ const ErrorContainer = styled.div`
 const LogoContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   margin-bottom: 30px;
   img {
-    width: 250px;
+    width: 40%;
+    max-width: 500px;
   }
 `;
 
